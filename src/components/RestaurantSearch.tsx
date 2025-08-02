@@ -92,7 +92,7 @@ export function RestaurantSearch({ onSelectRestaurant, onAddToList }: Restaurant
 
       <div className="grid gap-4">
         {restaurants.map((restaurant) => (
-          <Card key={restaurant.google_place_id} className="hover:bg-accent/50 transition-colors">
+          <Card key={restaurant.google_place_id} className="hover:bg-secondary/10 transition-colors">
             <CardContent className="p-4">
               <div className="flex gap-4">
                 {restaurant.image_url && (

@@ -183,7 +183,7 @@ export function AddToListDialog({ restaurant, open, onOpenChange, onSuccess }: A
           ) : (
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {lists.map((list) => (
-                <Card key={list.id} className="cursor-pointer hover:bg-accent/50 transition-colors">
+                <Card key={list.id} className="cursor-pointer hover:bg-secondary/10 transition-colors">
                   <CardContent className="p-3" onClick={() => addToList(list.id)}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">

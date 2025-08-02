@@ -289,7 +289,7 @@ export function ListViewDialog({ list, open, onOpenChange, onListUpdated }: List
             ) : (
               <div className="space-y-3">
                 {restaurants.map((restaurant) => (
-                  <Card key={restaurant.id} className="hover:bg-accent/50 transition-colors">
+                  <Card key={restaurant.id} className="hover:bg-secondary/10 transition-colors">
                     <CardContent className="p-4">
                       <div className="flex gap-4">
                         {restaurant.image_url && (

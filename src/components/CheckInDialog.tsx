@@ -251,7 +251,7 @@ export function CheckInDialog({ restaurant, open, onOpenChange, onCheckInComplet
                 />
                 <label
                   htmlFor="photo-upload"
-                  className={`flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50 transition-colors ${
+                  className={`flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:bg-secondary/10 transition-colors ${
                     photos.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
