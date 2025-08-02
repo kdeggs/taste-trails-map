@@ -105,9 +105,16 @@ const Map: React.FC<MapProps> = ({ userId }) => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    // Initialize map - using a default public token that works for demo
-    // In production, you should get your own token from https://mapbox.com/
-    mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZS1kZW1vIiwiYSI6ImNtNGNpejIyMzAwcjUyanM5Znp3MzZzaWwifQ.G8V9z3Y1Q1XK4pYqHgGqXw';
+    // For now, let's use a placeholder until you add your Mapbox token
+    // You can get a free token at https://mapbox.com/
+    const mapboxToken = 'YOUR_MAPBOX_TOKEN_HERE';
+    
+    if (mapboxToken === 'YOUR_MAPBOX_TOKEN_HERE') {
+      // Show message about needing token
+      return;
+    }
+
+    mapboxgl.accessToken = mapboxToken;
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -178,16 +185,21 @@ const Map: React.FC<MapProps> = ({ userId }) => {
   }, [locations]);
 
   return (
-    <div className="relative w-full h-96 rounded-lg overflow-hidden">
-      <div ref={mapContainer} className="absolute inset-0" />
-      {locations.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/80 text-muted-foreground">
-          <div className="text-center">
-            <p className="text-sm">No locations to show</p>
-            <p className="text-xs mt-1">Add restaurants to lists or check in to see them on the map</p>
-          </div>
+    <div className="relative w-full h-96 rounded-lg overflow-hidden bg-muted">
+      <div className="absolute inset-0 flex items-center justify-center bg-muted/80 text-muted-foreground">
+        <div className="text-center p-8">
+          <p className="text-lg font-medium mb-2">🗺️ Map Coming Soon!</p>
+          <p className="text-sm mb-4">Add your Mapbox API key to see your restaurant locations</p>
+          <a 
+            href="https://mapbox.com/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:underline text-sm"
+          >
+            Get free Mapbox token →
+          </a>
         </div>
-      )}
+      </div>
     </div>
   );
 };

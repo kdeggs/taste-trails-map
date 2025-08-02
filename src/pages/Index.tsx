@@ -11,6 +11,7 @@ import { RestaurantSearch } from "@/components/RestaurantSearch";
 import { CreateListDialog } from "@/components/CreateListDialog";
 import { CheckInDialog } from "@/components/CheckInDialog";
 import { AddToListDialog } from "@/components/AddToListDialog";
+import { ListViewDialog } from "@/components/ListViewDialog";
 import Map from "@/components/Map";
 import { useToast } from "@/hooks/use-toast";
 
@@ -60,6 +61,8 @@ const Index = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
   const [addToListDialogOpen, setAddToListDialogOpen] = useState(false);
+  const [listViewDialogOpen, setListViewDialogOpen] = useState(false);
+  const [selectedList, setSelectedList] = useState<RestaurantList | null>(null);
   const [lists, setLists] = useState<RestaurantList[]>([]);
   const [recentCheckIns, setRecentCheckIns] = useState<CheckIn[]>([]);
   const [loadingLists, setLoadingLists] = useState(true);
@@ -193,6 +196,11 @@ const Index = () => {
   const handleAddToList = (restaurant: Restaurant) => {
     setSelectedRestaurant(restaurant);
     setAddToListDialogOpen(true);
+  };
+
+  const handleViewList = (list: RestaurantList) => {
+    setSelectedList(list);
+    setListViewDialogOpen(true);
   };
 
   const handleCheckInComplete = () => {
@@ -396,7 +404,11 @@ const Index = () => {
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {lists.map((list) => (
-                      <Card key={list.id} className="cursor-pointer hover:bg-accent/50 transition-colors glass border-0">
+                      <Card 
+                        key={list.id} 
+                        className="cursor-pointer hover:bg-accent/50 transition-colors glass border-0"
+                        onClick={() => handleViewList(list)}
+                      >
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-2">
                             <h3 className="font-semibold">{list.name}</h3>
@@ -523,6 +535,13 @@ const Index = () => {
             description: "Restaurant has been added to your list.",
           });
         }}
+      />
+
+      <ListViewDialog
+        list={selectedList}
+        open={listViewDialogOpen}
+        onOpenChange={setListViewDialogOpen}
+        onListUpdated={loadUserLists}
       />
     </div>
   );
