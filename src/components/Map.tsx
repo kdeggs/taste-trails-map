@@ -23,6 +23,7 @@ const Map: React.FC<MapProps> = ({ userId }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [locations, setLocations] = useState<MapLocation[]>([]);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -125,6 +126,9 @@ const Map: React.FC<MapProps> = ({ userId }) => {
 
       // Add navigation controls
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      
+      // Set map as ready
+      setMapReady(true);
     } catch (error) {
       console.error('Error initializing map:', error);
     }
@@ -139,7 +143,7 @@ const Map: React.FC<MapProps> = ({ userId }) => {
   }, []);
 
   useEffect(() => {
-    if (!map.current || locations.length === 0) return;
+    if (!map.current || locations.length === 0 || !mapReady) return;
 
     // Clear existing markers
     const existingMarkers = document.querySelectorAll('.mapboxgl-marker');
@@ -189,7 +193,7 @@ const Map: React.FC<MapProps> = ({ userId }) => {
     if (!bounds.isEmpty()) {
       map.current.fitBounds(bounds, { padding: 50 });
     }
-  }, [locations]);
+  }, [locations, mapReady]);
 
   return (
     <div className="relative w-full h-96 rounded-lg overflow-hidden bg-muted">
