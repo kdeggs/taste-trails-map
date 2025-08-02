@@ -38,15 +38,18 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
   const [showFilters, setShowFilters] = useState(false)
   const { toast } = useToast()
 
-  const searchRestaurants = async () => {
-    if (!query.trim()) return
+  const searchRestaurants = async (searchQuery?: string, category?: string) => {
+    const queryToUse = searchQuery ?? query.trim()
+    const categoryToUse = category ?? selectedCategory
+    
+    if (!queryToUse && !categoryToUse) return
 
     setLoading(true)
     try {
       const { data, error } = await supabase.functions.invoke('search-restaurants', {
         body: { 
-          query: query.trim(),
-          category: selectedCategory,
+          query: queryToUse || undefined,
+          category: categoryToUse || undefined,
           priceRange,
           minRating,
           maxDistance
@@ -60,7 +63,7 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
       if (data.restaurants?.length === 0) {
         toast({
           title: "No restaurants found",
-          description: "Try adjusting your search or filters.",
+          description: queryToUse ? "Try a different search term." : "No restaurants found for this cuisine type.",
         })
       }
     } catch (error) {
@@ -77,12 +80,31 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      searchRestaurants()
+      handleSearch()
     }
   }
 
+  const handleSearch = () => {
+    if (!query.trim()) return
+    // When searching, clear cuisine filter to search across all cuisines
+    setSelectedCategory("")
+    searchRestaurants(query.trim(), "")
+  }
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category)
+    // When selecting a cuisine, clear search query and browse that cuisine
+    if (category) {
+      setQuery("")
+      searchRestaurants("", category)
+    } else {
+      // If clearing category, also clear results
+      setRestaurants([])
+    }
+  }
+
+  // Apply only price and rating filters (cuisine filtering is now done at API level)
   const filteredRestaurants = restaurants.filter(restaurant => {
-    if (selectedCategory && restaurant.cuisine_type !== selectedCategory) return false
     if (restaurant.rating && restaurant.rating < minRating) return false
     if (restaurant.price_level && (restaurant.price_level < priceRange[0] || restaurant.price_level > priceRange[1])) return false
     return true
@@ -97,13 +119,19 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
     setMaxDistance(25)
   }
 
-  // Auto-search when filters change
+  // Auto-search when price/rating/distance filters change (but not cuisine)
   useEffect(() => {
-    if (query.trim() && restaurants.length > 0) {
-      const timeoutId = setTimeout(searchRestaurants, 500)
+    if (restaurants.length > 0) {
+      const timeoutId = setTimeout(() => {
+        if (query.trim()) {
+          searchRestaurants(query.trim(), "")
+        } else if (selectedCategory) {
+          searchRestaurants("", selectedCategory)
+        }
+      }, 500)
       return () => clearTimeout(timeoutId)
     }
-  }, [selectedCategory, priceRange, minRating, maxDistance])
+  }, [priceRange, minRating, maxDistance])
 
   return (
     <div className="space-y-6">
@@ -120,7 +148,7 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
               className="pl-10 h-12 text-lg"
             />
           </div>
-          <Button onClick={searchRestaurants} disabled={loading || !query.trim()} size="lg">
+          <Button onClick={handleSearch} disabled={loading || !query.trim()} size="lg">
             {loading ? "Searching..." : "Search"}
           </Button>
           <Sheet open={showFilters} onOpenChange={setShowFilters}>
@@ -161,7 +189,7 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
         {/* Cuisine Categories */}
         <CuisineCategories
           selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+          onCategoryChange={handleCategoryChange}
         />
 
         {/* Active Filters Display */}
