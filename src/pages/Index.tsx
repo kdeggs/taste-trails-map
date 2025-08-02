@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { RestaurantSearch } from "@/components/RestaurantSearch";
 import { CreateListDialog } from "@/components/CreateListDialog";
 import { CheckInDialog } from "@/components/CheckInDialog";
+import { AddToListDialog } from "@/components/AddToListDialog";
+import Map from "@/components/Map";
 import { useToast } from "@/hooks/use-toast";
 
 interface Restaurant {
@@ -57,6 +59,7 @@ const Index = () => {
   const { user, signOut, loading } = useAuth();
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
+  const [addToListDialogOpen, setAddToListDialogOpen] = useState(false);
   const [lists, setLists] = useState<RestaurantList[]>([]);
   const [recentCheckIns, setRecentCheckIns] = useState<CheckIn[]>([]);
   const [loadingLists, setLoadingLists] = useState(true);
@@ -185,6 +188,11 @@ const Index = () => {
   const handleSelectRestaurant = (restaurant: Restaurant) => {
     setSelectedRestaurant(restaurant);
     setCheckInDialogOpen(true);
+  };
+
+  const handleAddToList = (restaurant: Restaurant) => {
+    setSelectedRestaurant(restaurant);
+    setAddToListDialogOpen(true);
   };
 
   const handleCheckInComplete = () => {
@@ -327,6 +335,22 @@ const Index = () => {
           </Card>
         </div>
 
+        {/* Map Section */}
+        <Card className="glass border-0 shadow-soft mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Your Restaurant Map
+            </CardTitle>
+            <CardDescription>
+              See all your check-ins and saved restaurants on the map
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Map userId={user?.id} />
+          </CardContent>
+        </Card>
+
           <TabsContent value="discover" className="space-y-6">
             <Card className="glass border-0 shadow-soft">
               <CardHeader>
@@ -339,7 +363,10 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RestaurantSearch onSelectRestaurant={handleSelectRestaurant} />
+                <RestaurantSearch 
+                  onSelectRestaurant={handleSelectRestaurant} 
+                  onAddToList={handleAddToList}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -483,6 +510,19 @@ const Index = () => {
         open={checkInDialogOpen}
         onOpenChange={setCheckInDialogOpen}
         onCheckInComplete={handleCheckInComplete}
+      />
+
+      <AddToListDialog
+        restaurant={selectedRestaurant}
+        open={addToListDialogOpen}
+        onOpenChange={setAddToListDialogOpen}
+        onSuccess={() => {
+          loadUserLists();
+          toast({
+            title: "Restaurant added!",
+            description: "Restaurant has been added to your list.",
+          });
+        }}
       />
     </div>
   );

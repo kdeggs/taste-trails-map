@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Search, MapPin, Star, DollarSign } from "lucide-react"
+import { Search, MapPin, Star, DollarSign, Plus, Check } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -21,9 +21,10 @@ interface Restaurant {
 
 interface RestaurantSearchProps {
   onSelectRestaurant: (restaurant: Restaurant) => void
+  onAddToList?: (restaurant: Restaurant) => void
 }
 
-export function RestaurantSearch({ onSelectRestaurant }: RestaurantSearchProps) {
+export function RestaurantSearch({ onSelectRestaurant, onAddToList }: RestaurantSearchProps) {
   const [query, setQuery] = useState("")
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [loading, setLoading] = useState(false)
@@ -91,8 +92,8 @@ export function RestaurantSearch({ onSelectRestaurant }: RestaurantSearchProps) 
 
       <div className="grid gap-4">
         {restaurants.map((restaurant) => (
-          <Card key={restaurant.google_place_id} className="cursor-pointer hover:bg-accent/50 transition-colors">
-            <CardContent className="p-4" onClick={() => onSelectRestaurant(restaurant)}>
+          <Card key={restaurant.google_place_id} className="hover:bg-accent/50 transition-colors">
+            <CardContent className="p-4">
               <div className="flex gap-4">
                 {restaurant.image_url && (
                   <img
@@ -132,6 +133,28 @@ export function RestaurantSearch({ onSelectRestaurant }: RestaurantSearchProps) 
                       {restaurant.cuisine_type.replace('_', ' ')}
                     </Badge>
                   )}
+
+                  <div className="flex gap-2 mt-4">
+                    <Button 
+                      size="sm" 
+                      onClick={() => onSelectRestaurant(restaurant)}
+                      className="flex items-center gap-1"
+                    >
+                      <Check className="h-3 w-3" />
+                      Check In
+                    </Button>
+                    {onAddToList && (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => onAddToList(restaurant)}
+                        className="flex items-center gap-1"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add to List
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
