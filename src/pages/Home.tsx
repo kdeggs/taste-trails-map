@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { MapPin, Star, Users, TrendingUp, LogOut, Edit3, Trash2, MoreVertical } from "lucide-react";
 import Map from "@/components/Map";
 import { CheckInDialog } from "@/components/CheckInDialog";
+import { CheckInDetailsDialog } from "@/components/CheckInDetailsDialog";
 
 interface CheckIn {
   id: string;
@@ -45,6 +46,7 @@ export default function Home() {
   const [showCheckInDialog, setShowCheckInDialog] = useState(false);
   const [editingCheckIn, setEditingCheckIn] = useState<CheckIn | null>(null);
   const [deleteCheckInId, setDeleteCheckInId] = useState<string | null>(null);
+  const [viewingCheckIn, setViewingCheckIn] = useState<CheckIn | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -289,7 +291,8 @@ export default function Home() {
                 {recentCheckIns.map((checkIn) => (
                   <div
                     key={checkIn.id}
-                    className="flex items-center space-x-4 p-3 rounded-lg border hover:bg-secondary/10 transition-colors"
+                    className="flex items-center space-x-4 p-3 rounded-lg border hover:bg-secondary/10 transition-colors cursor-pointer"
+                    onClick={() => setViewingCheckIn(checkIn)}
                   >
                     <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
                       {checkIn.restaurants?.image_url ? (
@@ -322,11 +325,16 @@ export default function Home() {
                       )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenuItem onClick={() => handleEditCheckIn(checkIn)}>
                             <Edit3 className="h-4 w-4 mr-2" />
                             Edit
@@ -352,6 +360,13 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Check-in Details Dialog */}
+      <CheckInDetailsDialog
+        checkIn={viewingCheckIn}
+        open={!!viewingCheckIn}
+        onOpenChange={() => setViewingCheckIn(null)}
+      />
 
       {/* Check-in Dialog */}
       <CheckInDialog
