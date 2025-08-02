@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MapPin, Star, Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -25,14 +25,33 @@ interface CheckInDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCheckInComplete: () => void
+  editingCheckIn?: {
+    id: string
+    notes?: string
+    rating?: number
+    visited_at: string
+  } | null
 }
 
-export function CheckInDialog({ restaurant, open, onOpenChange, onCheckInComplete }: CheckInDialogProps) {
+export function CheckInDialog({ restaurant, open, onOpenChange, onCheckInComplete, editingCheckIn }: CheckInDialogProps) {
   const [notes, setNotes] = useState("")
   const [rating, setRating] = useState<number | null>(null)
   const [photos, setPhotos] = useState<File[]>([])
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+
+  // Reset form when dialog opens/closes or editingCheckIn changes
+  useEffect(() => {
+    if (open && editingCheckIn) {
+      setNotes(editingCheckIn.notes || "")
+      setRating(editingCheckIn.rating || null)
+      setPhotos([])
+    } else if (open && !editingCheckIn) {
+      setNotes("")
+      setRating(null)
+      setPhotos([])
+    }
+  }, [open, editingCheckIn])
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -117,22 +136,38 @@ export function CheckInDialog({ restaurant, open, onOpenChange, onCheckInComplet
       // Upload photos if any
       const photoUrls = photos.length > 0 ? await uploadPhotos(restaurantId) : null
 
-      // Create check-in
-      const { error: checkInError } = await supabase
-        .from('check_ins')
-        .insert({
-          user_id: user.id,
-          restaurant_id: restaurantId,
-          notes: notes.trim() || null,
-          rating,
-          images: photoUrls
-        })
+      if (editingCheckIn) {
+        // Update existing check-in
+        const { error: updateError } = await supabase
+          .from('check_ins')
+          .update({
+            notes: notes.trim() || null,
+            rating,
+            ...(photoUrls && { images: photoUrls })
+          })
+          .eq('id', editingCheckIn.id)
 
-      if (checkInError) throw checkInError
+        if (updateError) throw updateError
+      } else {
+        // Create new check-in
+        const { error: checkInError } = await supabase
+          .from('check_ins')
+          .insert({
+            user_id: user.id,
+            restaurant_id: restaurantId,
+            notes: notes.trim() || null,
+            rating,
+            images: photoUrls
+          })
+
+        if (checkInError) throw checkInError
+      }
 
       toast({
-        title: "Check-in complete!",
-        description: `You've checked in to ${restaurant.name}.`,
+        title: editingCheckIn ? "Check-in updated!" : "Check-in complete!",
+        description: editingCheckIn 
+          ? `Your visit to ${restaurant.name} has been updated.`
+          : `You've checked in to ${restaurant.name}.`,
       })
 
       // Reset form
@@ -159,7 +194,7 @@ export function CheckInDialog({ restaurant, open, onOpenChange, onCheckInComplet
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Check in to {restaurant.name}</DialogTitle>
+          <DialogTitle>{editingCheckIn ? `Edit ${restaurant.name} Check-in` : `Check in to ${restaurant.name}`}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
@@ -254,7 +289,7 @@ export function CheckInDialog({ restaurant, open, onOpenChange, onCheckInComplet
                 Cancel
               </Button>
               <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? "Checking in..." : "Check In"}
+                {loading ? (editingCheckIn ? "Updating..." : "Checking in...") : (editingCheckIn ? "Update Check-in" : "Check In")}
               </Button>
             </div>
           </form>

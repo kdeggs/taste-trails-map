@@ -6,7 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Star, Users, TrendingUp, LogOut } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { MapPin, Star, Users, TrendingUp, LogOut, Edit3, Trash2, MoreVertical } from "lucide-react";
 import Map from "@/components/Map";
 import { CheckInDialog } from "@/components/CheckInDialog";
 
@@ -41,6 +43,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
   const [showCheckInDialog, setShowCheckInDialog] = useState(false);
+  const [editingCheckIn, setEditingCheckIn] = useState<CheckIn | null>(null);
+  const [deleteCheckInId, setDeleteCheckInId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -136,11 +140,43 @@ export default function Home() {
   const handleCheckInComplete = () => {
     setShowCheckInDialog(false);
     setSelectedRestaurant(null);
+    setEditingCheckIn(null);
     loadUserData();
     toast({
-      title: "Check-in saved!",
-      description: "Your restaurant visit has been recorded.",
+      title: editingCheckIn ? "Check-in updated!" : "Check-in saved!",
+      description: editingCheckIn ? "Your restaurant visit has been updated." : "Your restaurant visit has been recorded.",
     });
+  };
+
+  const handleEditCheckIn = (checkIn: CheckIn) => {
+    setEditingCheckIn(checkIn);
+    setSelectedRestaurant(checkIn.restaurants);
+    setShowCheckInDialog(true);
+  };
+
+  const handleDeleteCheckIn = async (checkInId: string) => {
+    try {
+      const { error } = await supabase
+        .from("check_ins")
+        .delete()
+        .eq("id", checkInId);
+
+      if (error) throw error;
+
+      loadUserData();
+      toast({
+        title: "Check-in deleted",
+        description: "Your restaurant visit has been removed.",
+      });
+    } catch (error) {
+      console.error("Error deleting check-in:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete check-in. Please try again.",
+        variant: "destructive",
+      });
+    }
+    setDeleteCheckInId(null);
   };
 
   if (loading) {
@@ -253,7 +289,7 @@ export default function Home() {
                 {recentCheckIns.map((checkIn) => (
                   <div
                     key={checkIn.id}
-                    className="flex items-center space-x-4 p-3 rounded-lg border hover:bg-secondary/10 transition-colors btn-press"
+                    className="flex items-center space-x-4 p-3 rounded-lg border hover:bg-secondary/10 transition-colors"
                   >
                     <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
                       {checkIn.restaurants?.image_url ? (
@@ -277,12 +313,34 @@ export default function Home() {
                         {new Date(checkIn.visited_at).toLocaleDateString()}
                       </p>
                     </div>
-                    {checkIn.rating && (
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 fill-current text-secondary" />
-                        <span className="text-sm font-medium">{checkIn.rating}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center space-x-2">
+                      {checkIn.rating && (
+                        <div className="flex items-center space-x-1">
+                          <Star className="h-4 w-4 fill-current text-secondary" />
+                          <span className="text-sm font-medium">{checkIn.rating}</span>
+                        </div>
+                      )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditCheckIn(checkIn)}>
+                            <Edit3 className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setDeleteCheckInId(checkIn.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -301,7 +359,29 @@ export default function Home() {
         open={showCheckInDialog}
         onOpenChange={setShowCheckInDialog}
         onCheckInComplete={handleCheckInComplete}
+        editingCheckIn={editingCheckIn}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteCheckInId} onOpenChange={() => setDeleteCheckInId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Check-in</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this check-in? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => deleteCheckInId && handleDeleteCheckIn(deleteCheckInId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       </div>
     </PageTransition>
   );
