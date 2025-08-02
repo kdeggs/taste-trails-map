@@ -20,7 +20,7 @@ interface MapLocation {
   listColor?: string;
 }
 
-const DEFAULT_CENTER: [number, number] = [-74.006, 40.7128]; // NYC
+const DEFAULT_CENTER: [number, number] = [-122.4194, 37.7749]; // San Francisco
 const DEFAULT_ZOOM = 12;
 
 const Map: React.FC<MapProps> = ({ userId }) => {
