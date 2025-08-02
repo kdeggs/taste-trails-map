@@ -6,6 +6,8 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
+  console.log('get-mapbox-token function called');
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -13,8 +15,10 @@ Deno.serve(async (req) => {
 
   try {
     const mapboxToken = Deno.env.get('MAPBOX_PUBLIC_TOKEN');
+    console.log('Mapbox token exists:', !!mapboxToken);
     
     if (!mapboxToken) {
+      console.error('MAPBOX_PUBLIC_TOKEN not found in environment');
       return new Response(
         JSON.stringify({ error: 'Mapbox token not configured' }),
         { 
@@ -24,6 +28,7 @@ Deno.serve(async (req) => {
       );
     }
 
+    console.log('Returning mapbox token successfully');
     return new Response(
       JSON.stringify({ token: mapboxToken }),
       { 
@@ -32,7 +37,7 @@ Deno.serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error fetching Mapbox token:', error);
+    console.error('Error in get-mapbox-token function:', error);
     return new Response(
       JSON.stringify({ error: 'Failed to fetch Mapbox token' }),
       { 
