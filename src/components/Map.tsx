@@ -28,6 +28,7 @@ const Map: React.FC<MapProps> = ({ userId }) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [locations, setLocations] = useState<MapLocation[]>([]);
   const [mapReady, setMapReady] = useState(false);
+  const userBounds = useRef<mapboxgl.LngLatBounds | null>(null);
 
   useEffect(() => {
     if (userId) {
@@ -131,39 +132,69 @@ const Map: React.FC<MapProps> = ({ userId }) => {
       // Add navigation controls
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
       
-      // Add home button to recenter map
-      const homeButton = document.createElement('button');
+      // Add home button to recenter to user's locations
+      const homeButton = document.createElement('div');
       homeButton.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
-      homeButton.innerHTML = `
-        <button 
-          class="mapboxgl-ctrl-icon hover:bg-secondary/10 transition-colors" 
-          type="button" 
-          title="Reset to default view"
-          aria-label="Reset map to default view"
-        >
-          <div style="
-            width: 20px; 
-            height: 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            font-size: 14px;
-          ">🏠</div>
-        </button>
+      
+      const buttonElement = document.createElement('button');
+      buttonElement.className = 'mapboxgl-ctrl-icon';
+      buttonElement.type = 'button';
+      buttonElement.title = 'Show my restaurants';
+      buttonElement.setAttribute('aria-label', 'Center map on my restaurants');
+      buttonElement.style.cssText = `
+        width: 29px;
+        height: 29px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
       `;
       
-      homeButton.addEventListener('click', () => {
-        map.current?.easeTo({
-          center: DEFAULT_CENTER,
-          zoom: DEFAULT_ZOOM,
-          duration: 1000
-        });
+      // Create the home icon using Lucide
+      buttonElement.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9,22 9,12 15,12 15,22"/>
+        </svg>
+      `;
+      
+      buttonElement.addEventListener('mouseover', () => {
+        buttonElement.style.backgroundColor = '#f3f4f6';
       });
       
+      buttonElement.addEventListener('mouseout', () => {
+        buttonElement.style.backgroundColor = 'white';
+      });
+      
+      buttonElement.addEventListener('click', () => {
+        if (userBounds.current && !userBounds.current.isEmpty()) {
+          if (locations.length === 1) {
+            // For single location, use a moderate zoom level
+            map.current?.easeTo({
+              center: [locations[0].longitude, locations[0].latitude],
+              zoom: 14,
+              duration: 1000
+            });
+          } else {
+            // For multiple locations, fit bounds
+            map.current?.fitBounds(userBounds.current, { 
+              padding: 50,
+              duration: 1000
+            });
+          }
+        }
+      });
+      
+      homeButton.appendChild(buttonElement);
+      
+      // Add to top-right with other controls
       map.current.addControl({
         onAdd: () => homeButton,
         onRemove: () => homeButton.remove()
-      }, 'top-left');
+      }, 'top-right');
       
       // Set map as ready
       setMapReady(true);
@@ -227,8 +258,11 @@ const Map: React.FC<MapProps> = ({ userId }) => {
       bounds.extend([location.longitude, location.latitude]);
     });
 
-    // Fit map to markers with appropriate zoom
+    // Create bounds for user's locations and fit map to markers
     if (!bounds.isEmpty()) {
+      // Store the user's bounds for the home button
+      userBounds.current = bounds;
+      
       if (locations.length === 1) {
         // For single location, use a moderate zoom level instead of fitBounds
         map.current.setCenter([locations[0].longitude, locations[0].latitude]);
@@ -237,6 +271,9 @@ const Map: React.FC<MapProps> = ({ userId }) => {
         // For multiple locations, fit bounds with padding
         map.current.fitBounds(bounds, { padding: 50 });
       }
+    } else {
+      // No user locations, clear the stored bounds
+      userBounds.current = null;
     }
   }, [locations, mapReady]);
 
