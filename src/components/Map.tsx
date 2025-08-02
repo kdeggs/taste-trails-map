@@ -102,22 +102,37 @@ const Map: React.FC<MapProps> = ({ userId }) => {
     }
   };
 
-  useEffect(() => {
+  const initializeMap = async () => {
     if (!mapContainer.current || map.current) return;
-    const mapboxToken = 'pk.eyJ1Ijoia2Q4MzAiLCJhIjoiY21kdXNwM2RwMWwzMjJtcHZ1dnFrNHpoMSJ9.6TZl8vMPqq-Wl7VLhh8a7g';
-
-    mapboxgl.accessToken = mapboxToken;
     
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [-74.006, 40.7128], // NYC default
-      zoom: 12
-    });
+    try {
+      // Get Mapbox token from our edge function
+      const { data: tokenData, error } = await supabase.functions.invoke('get-mapbox-token');
+      
+      if (error || !tokenData?.token) {
+        console.error('Failed to get Mapbox token:', error);
+        return;
+      }
 
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      mapboxgl.accessToken = tokenData.token;
+    
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [-74.006, 40.7128], // NYC default
+        zoom: 12
+      });
 
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    } catch (error) {
+      console.error('Error initializing map:', error);
+    }
+  };
+
+  useEffect(() => {
+    initializeMap();
+    
     return () => {
       map.current?.remove();
     };
@@ -178,20 +193,7 @@ const Map: React.FC<MapProps> = ({ userId }) => {
 
   return (
     <div className="relative w-full h-96 rounded-lg overflow-hidden bg-muted">
-      <div className="absolute inset-0 flex items-center justify-center bg-muted/80 text-muted-foreground">
-        <div className="text-center p-8">
-          <p className="text-lg font-medium mb-2">🗺️ Map Coming Soon!</p>
-          <p className="text-sm mb-4">Add your Mapbox API key to see your restaurant locations</p>
-          <a 
-            href="https://mapbox.com/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-primary hover:underline text-sm"
-          >
-            Get free Mapbox token →
-          </a>
-        </div>
-      </div>
+      <div ref={mapContainer} className="absolute inset-0" />
     </div>
   );
 };
