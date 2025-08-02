@@ -34,7 +34,7 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
   const [selectedCategory, setSelectedCategory] = useState("")
   const [priceRange, setPriceRange] = useState<[number, number]>([1, 4])
   const [minRating, setMinRating] = useState(0)
-  const [maxDistance, setMaxDistance] = useState(25)
+  const [maxDistance, setMaxDistance] = useState(15) // in miles
   const [showFilters, setShowFilters] = useState(false)
   const { toast } = useToast()
 
@@ -110,13 +110,13 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
     return true
   })
 
-  const hasActiveFilters = selectedCategory || minRating > 0 || priceRange[0] > 1 || priceRange[1] < 4 || maxDistance < 25
+  const hasActiveFilters = selectedCategory || minRating > 0 || priceRange[0] > 1 || priceRange[1] < 4 || maxDistance < 15
 
   const clearFilters = () => {
     setSelectedCategory("")
     setPriceRange([1, 4])
     setMinRating(0)
-    setMaxDistance(25)
+    setMaxDistance(15)
   }
 
   // Auto-search when price/rating/distance filters change (but not cuisine)
@@ -199,7 +199,7 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
             {selectedCategory && <span className="capitalize">{selectedCategory}</span>}
             {minRating > 0 && <span>{minRating}+ stars</span>}
             {(priceRange[0] > 1 || priceRange[1] < 4) && <span>${'$'.repeat(priceRange[0])} - ${'$'.repeat(priceRange[1])}</span>}
-            {maxDistance < 25 && <span>Within {maxDistance}km</span>}
+            {maxDistance < 15 && <span>Within {maxDistance} miles</span>}
             <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-1">
               <X className="h-3 w-3" />
             </Button>

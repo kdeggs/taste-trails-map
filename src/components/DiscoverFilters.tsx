@@ -48,6 +48,7 @@ export function DiscoverFilters({
             min={1}
             step={1}
             className="w-full"
+            minStepsBetweenThumbs={0}
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>$</span>
@@ -89,20 +90,20 @@ export function DiscoverFilters({
               <span className="text-sm font-medium">Distance</span>
             </div>
             <Badge variant="outline">
-              {maxDistance === 50 ? "50+ km" : `${maxDistance} km`}
+              {maxDistance === 31 ? "30+ miles" : `${maxDistance} miles`}
             </Badge>
           </div>
           <Slider
             value={[maxDistance]}
             onValueChange={(value) => onMaxDistanceChange(value[0])}
-            max={50}
+            max={31}
             min={1}
             step={1}
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>1km</span>
-            <span>50km+</span>
+            <span>1 mile</span>
+            <span>30+ miles</span>
           </div>
         </div>
       </CardContent>
