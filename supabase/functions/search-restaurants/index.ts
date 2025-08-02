@@ -86,12 +86,27 @@ serve(async (req) => {
     )
 
     const body = await req.json()
-    const { query, location } = body
+    const { query, category, location } = body
     
-    // Validate inputs
-    const queryValidation = validateSearchQuery(query)
-    if (!queryValidation.isValid) {
-      return createErrorResponse(queryValidation.error || 'Invalid query', 400)
+    // Validate inputs - either query or category is required
+    if (!query && !category) {
+      return createErrorResponse('Either query or category is required', 400)
+    }
+    
+    let searchTerm = ''
+    if (query) {
+      const queryValidation = validateSearchQuery(query)
+      if (!queryValidation.isValid) {
+        return createErrorResponse(queryValidation.error || 'Invalid query', 400)
+      }
+      searchTerm = queryValidation.sanitized
+    } else if (category) {
+      // Validate category
+      const validCategories = ['italian', 'asian', 'mexican', 'american', 'indian', 'french', 'mediterranean', 'japanese', 'thai', 'chinese']
+      if (typeof category !== 'string' || !validCategories.includes(category.toLowerCase())) {
+        return createErrorResponse('Invalid category', 400)
+      }
+      searchTerm = category.toLowerCase()
     }
     
     const locationValidation = validateLocation(location)
@@ -106,13 +121,15 @@ serve(async (req) => {
     }
 
     console.log('Searching for restaurants:', { 
-      query: queryValidation.sanitized, 
+      query: query || 'none', 
+      category: category || 'none',
+      searchTerm,
       hasLocation: !!location 
     })
 
     // Search for restaurants using Google Places API with sanitized input
     const searchUrl = new URL('https://maps.googleapis.com/maps/api/place/textsearch/json')
-    searchUrl.searchParams.set('query', `${queryValidation.sanitized} restaurant`)
+    searchUrl.searchParams.set('query', `${searchTerm} restaurant`)
     if (location) {
       searchUrl.searchParams.set('location', `${location.lat},${location.lng}`)
       searchUrl.searchParams.set('radius', '10000')
