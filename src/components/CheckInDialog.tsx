@@ -65,10 +65,14 @@ export function CheckInDialog({ restaurant, open, onOpenChange, onCheckInComplet
   const uploadPhotos = async (restaurantId: string): Promise<string[]> => {
     const uploadedUrls: string[] = []
     
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+
     for (const photo of photos) {
       const fileExt = photo.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `${restaurantId}/${fileName}`
+      // Organize by user ID to match storage policy: user_id/restaurant_id/filename
+      const filePath = `${user.id}/${restaurantId}/${fileName}`
 
       const { error: uploadError } = await supabase.storage
         .from('check-in-photos')
