@@ -1,1 +1,7 @@
 project_id = "ksjryaqjygbbvzfygnoa"
+
+[functions.search-restaurants]
+verify_jwt = false
+
+[functions.get-mapbox-token]
+verify_jwt = false
