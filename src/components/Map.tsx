@@ -104,15 +104,7 @@ const Map: React.FC<MapProps> = ({ userId }) => {
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
-
-    // For now, let's use a placeholder until you add your Mapbox token
-    // You can get a free token at https://mapbox.com/
-    const mapboxToken = 'YOUR_MAPBOX_TOKEN_HERE';
-    
-    if (mapboxToken === 'YOUR_MAPBOX_TOKEN_HERE') {
-      // Show message about needing token
-      return;
-    }
+    const mapboxToken = 'pk.eyJ1Ijoia2Q4MzAiLCJhIjoiY21kdXNwM2RwMWwzMjJtcHZ1dnFrNHpoMSJ9.6TZl8vMPqq-Wl7VLhh8a7g';
 
     mapboxgl.accessToken = mapboxToken;
     
