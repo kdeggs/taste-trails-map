@@ -173,7 +173,7 @@ export default function Home() {
       <div className="p-4 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="btn-interactive">
+          <Card className="btn-interactive hover:shadow-primary-glow hover:scale-[1.02] transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Places Visited</CardTitle>
               <MapPin className="h-4 w-4 text-primary" />
@@ -184,7 +184,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="btn-interactive">
+          <Card className="btn-interactive hover:shadow-secondary-glow hover:scale-[1.02] transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
               <Star className="h-4 w-4 text-secondary" />
@@ -195,7 +195,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="btn-interactive">
+          <Card className="btn-interactive hover:shadow-accent-glow hover:scale-[1.02] transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Following</CardTitle>
               <Users className="h-4 w-4 text-accent" />
@@ -206,7 +206,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="btn-interactive">
+          <Card className="btn-interactive hover:shadow-tertiary-glow hover:scale-[1.02] transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">This Month</CardTitle>
               <TrendingUp className="h-4 w-4 text-tertiary" />
