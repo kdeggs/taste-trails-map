@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
+import { Home } from 'lucide-react';
 
 interface MapProps {
   userId?: string;
@@ -18,6 +19,9 @@ interface MapLocation {
   listName?: string;
   listColor?: string;
 }
+
+const DEFAULT_CENTER: [number, number] = [-74.006, 40.7128]; // NYC
+const DEFAULT_ZOOM = 12;
 
 const Map: React.FC<MapProps> = ({ userId }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -120,12 +124,46 @@ const Map: React.FC<MapProps> = ({ userId }) => {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
-        center: [-74.006, 40.7128], // NYC default
-        zoom: 12
+        center: DEFAULT_CENTER,
+        zoom: DEFAULT_ZOOM
       });
 
       // Add navigation controls
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      
+      // Add home button to recenter map
+      const homeButton = document.createElement('button');
+      homeButton.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+      homeButton.innerHTML = `
+        <button 
+          class="mapboxgl-ctrl-icon hover:bg-secondary/10 transition-colors" 
+          type="button" 
+          title="Reset to default view"
+          aria-label="Reset map to default view"
+        >
+          <div style="
+            width: 20px; 
+            height: 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 14px;
+          ">🏠</div>
+        </button>
+      `;
+      
+      homeButton.addEventListener('click', () => {
+        map.current?.easeTo({
+          center: DEFAULT_CENTER,
+          zoom: DEFAULT_ZOOM,
+          duration: 1000
+        });
+      });
+      
+      map.current.addControl({
+        onAdd: () => homeButton,
+        onRemove: () => homeButton.remove()
+      }, 'top-left');
       
       // Set map as ready
       setMapReady(true);
@@ -189,9 +227,16 @@ const Map: React.FC<MapProps> = ({ userId }) => {
       bounds.extend([location.longitude, location.latitude]);
     });
 
-    // Fit map to markers
+    // Fit map to markers with appropriate zoom
     if (!bounds.isEmpty()) {
-      map.current.fitBounds(bounds, { padding: 50 });
+      if (locations.length === 1) {
+        // For single location, use a moderate zoom level instead of fitBounds
+        map.current.setCenter([locations[0].longitude, locations[0].latitude]);
+        map.current.setZoom(14); // Zoomed out a bit more for single pins
+      } else {
+        // For multiple locations, fit bounds with padding
+        map.current.fitBounds(bounds, { padding: 50 });
+      }
     }
   }, [locations, mapReady]);
 
