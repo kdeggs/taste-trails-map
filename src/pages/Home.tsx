@@ -253,7 +253,7 @@ export default function Home() {
                 {recentCheckIns.map((checkIn) => (
                   <div
                     key={checkIn.id}
-                    className="flex items-center space-x-4 p-3 rounded-lg border hover:bg-accent/50 transition-colors btn-press"
+                    className="flex items-center space-x-4 p-3 rounded-lg border hover:bg-secondary/10 transition-colors btn-press"
                   >
                     <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
                       {checkIn.restaurants?.image_url ? (
