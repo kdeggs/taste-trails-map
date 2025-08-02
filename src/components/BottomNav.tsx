@@ -1,6 +1,7 @@
 import { Home, Search, List, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { icon: Home, label: "My Trail", path: "/" },
@@ -11,6 +12,12 @@ const navItems = [
 
 export const BottomNav = () => {
   const location = useLocation();
+  const { user } = useAuth();
+
+  // Only show navigation if user is authenticated
+  if (!user) {
+    return null;
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-t border-border">
