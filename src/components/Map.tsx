@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
-import { Home } from 'lucide-react';
+import { escapeHtml } from '@/lib/security';
 
 interface MapProps {
   userId?: string;
@@ -153,13 +153,26 @@ const Map: React.FC<MapProps> = ({ userId }) => {
         transition: background-color 0.2s;
       `;
       
-      // Create the home icon using Lucide
-      buttonElement.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9,22 9,12 15,12 15,22"/>
-        </svg>
-      `;
+      // Create the home icon safely without innerHTML
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '18');
+      svg.setAttribute('height', '18');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      svg.setAttribute('stroke-width', '2');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+      
+      const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path1.setAttribute('d', 'm3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z');
+      
+      const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      polyline.setAttribute('points', '9,22 9,12 15,12 15,22');
+      
+      svg.appendChild(path1);
+      svg.appendChild(polyline);
+      buttonElement.appendChild(svg);
       
       buttonElement.addEventListener('mouseover', () => {
         buttonElement.style.backgroundColor = '#f3f4f6';
@@ -228,25 +241,49 @@ const Map: React.FC<MapProps> = ({ userId }) => {
       
       if (location.type === 'checkin') {
         markerEl.style.backgroundColor = '#ff6b9d';
-        markerEl.innerHTML = '✓';
+        markerEl.textContent = '✓';
       } else {
         markerEl.style.backgroundColor = location.listColor || '#6366f1';
-        markerEl.innerHTML = '📍';
+        markerEl.textContent = '📍';
       }
 
-      // Create popup content
-      const popupContent = `
-        <div class="p-2">
-          <h3 class="font-semibold text-sm">${location.name}</h3>
-          ${location.address ? `<p class="text-xs text-gray-600 mt-1">${location.address}</p>` : ''}
-          ${location.rating ? `<p class="text-xs mt-1">⭐ ${location.rating}</p>` : ''}
-          ${location.listName ? `<p class="text-xs mt-1">📋 ${location.listName}</p>` : ''}
-          <p class="text-xs mt-1 font-medium">${location.type === 'checkin' ? 'Check-in' : 'From List'}</p>
-        </div>
-      `;
+      // Create popup content safely without HTML injection
+      const popupDiv = document.createElement('div');
+      popupDiv.className = 'p-2';
+      
+      const title = document.createElement('h3');
+      title.className = 'font-semibold text-sm';
+      title.textContent = location.name;
+      popupDiv.appendChild(title);
+      
+      if (location.address) {
+        const address = document.createElement('p');
+        address.className = 'text-xs text-gray-600 mt-1';
+        address.textContent = location.address;
+        popupDiv.appendChild(address);
+      }
+      
+      if (location.rating) {
+        const rating = document.createElement('p');
+        rating.className = 'text-xs mt-1';
+        rating.textContent = `⭐ ${location.rating}`;
+        popupDiv.appendChild(rating);
+      }
+      
+      if (location.listName) {
+        const listName = document.createElement('p');
+        listName.className = 'text-xs mt-1';
+        listName.textContent = `📋 ${location.listName}`;
+        popupDiv.appendChild(listName);
+      }
+      
+      const type = document.createElement('p');
+      type.className = 'text-xs mt-1 font-medium';
+      type.textContent = location.type === 'checkin' ? 'Check-in' : 'From List';
+      popupDiv.appendChild(type);
 
       const popup = new mapboxgl.Popup({ offset: 25 })
-        .setHTML(popupContent);
+        .setDOMContent(popupDiv);
 
       // Add marker to map
       new mapboxgl.Marker(markerEl)
