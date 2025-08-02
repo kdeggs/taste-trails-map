@@ -18,6 +18,7 @@ interface CheckIn {
   visited_at: string;
   notes?: string;
   rating?: number;
+  images?: string[];
   restaurants: {
     id: string;
     name: string;
@@ -110,6 +111,7 @@ export default function Home() {
         visited_at,
         notes,
         rating,
+        images,
         restaurants (
           id,
           name,
