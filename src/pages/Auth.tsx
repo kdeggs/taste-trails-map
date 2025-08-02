@@ -43,7 +43,7 @@ const Auth = () => {
               <span className="text-3xl">🍽️</span>
             </div>
             <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              {isSignUp ? 'Join Taste Trails' : 'Welcome Back'}
+              {isSignUp ? 'Join Taste Trails' : 'Welcome to Taste Trails'}
             </CardTitle>
             <CardDescription className="text-muted-foreground">
               {isSignUp 
