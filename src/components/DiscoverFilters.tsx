@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge"
 import { Star, DollarSign, MapPin } from "lucide-react"
 
 interface DiscoverFiltersProps {
-  priceRange: [number, number]
-  onPriceRangeChange: (range: [number, number]) => void
+  maxPrice: number
+  onMaxPriceChange: (price: number) => void
   minRating: number
   onMinRatingChange: (rating: number) => void
   maxDistance: number
@@ -13,8 +13,8 @@ interface DiscoverFiltersProps {
 }
 
 export function DiscoverFilters({
-  priceRange,
-  onPriceRangeChange,
+  maxPrice,
+  onMaxPriceChange,
   minRating,
   onMinRatingChange,
   maxDistance,
@@ -35,20 +35,19 @@ export function DiscoverFilters({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Price Range</span>
+              <span className="text-sm font-medium">Max Price</span>
             </div>
             <Badge variant="outline">
-              {formatPriceLevel(priceRange[0])} - {formatPriceLevel(priceRange[1])}
+              Up to {formatPriceLevel(maxPrice)}
             </Badge>
           </div>
           <Slider
-            value={priceRange}
-            onValueChange={(value) => onPriceRangeChange([value[0], value[1]])}
+            value={[maxPrice]}
+            onValueChange={(value) => onMaxPriceChange(value[0])}
             max={4}
             min={1}
             step={1}
             className="w-full"
-            minStepsBetweenThumbs={0}
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>$</span>

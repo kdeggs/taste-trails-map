@@ -32,7 +32,7 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState("")
-  const [priceRange, setPriceRange] = useState<[number, number]>([1, 4])
+  const [maxPrice, setMaxPrice] = useState(4)
   const [minRating, setMinRating] = useState(0)
   const [maxDistance, setMaxDistance] = useState(15) // in miles
   const [showFilters, setShowFilters] = useState(false)
@@ -50,7 +50,7 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
         body: { 
           query: queryToUse || undefined,
           category: categoryToUse || undefined,
-          priceRange,
+          maxPrice,
           minRating,
           maxDistance
         }
@@ -103,18 +103,17 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
     }
   }
 
-  // Apply only price and rating filters (cuisine filtering is now done at API level)
   const filteredRestaurants = restaurants.filter(restaurant => {
     if (restaurant.rating && restaurant.rating < minRating) return false
-    if (restaurant.price_level && (restaurant.price_level < priceRange[0] || restaurant.price_level > priceRange[1])) return false
+    if (restaurant.price_level && restaurant.price_level > maxPrice) return false
     return true
   })
 
-  const hasActiveFilters = selectedCategory || minRating > 0 || priceRange[0] > 1 || priceRange[1] < 4 || maxDistance < 15
+  const hasActiveFilters = selectedCategory || minRating > 0 || maxPrice < 4 || maxDistance < 15
 
   const clearFilters = () => {
     setSelectedCategory("")
-    setPriceRange([1, 4])
+    setMaxPrice(4)
     setMinRating(0)
     setMaxDistance(15)
   }
@@ -131,7 +130,7 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
       }, 500)
       return () => clearTimeout(timeoutId)
     }
-  }, [priceRange, minRating, maxDistance])
+  }, [maxPrice, minRating, maxDistance])
 
   return (
     <div className="space-y-6">
@@ -174,8 +173,8 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
               </SheetHeader>
               <div className="mt-6">
                 <DiscoverFilters
-                  priceRange={priceRange}
-                  onPriceRangeChange={setPriceRange}
+                  maxPrice={maxPrice}
+                  onMaxPriceChange={setMaxPrice}
                   minRating={minRating}
                   onMinRatingChange={setMinRating}
                   maxDistance={maxDistance}
@@ -198,7 +197,7 @@ export function EnhancedRestaurantSearch({ onSelectRestaurant, onAddToList }: En
             <span>Active filters:</span>
             {selectedCategory && <span className="capitalize">{selectedCategory}</span>}
             {minRating > 0 && <span>{minRating}+ stars</span>}
-            {(priceRange[0] > 1 || priceRange[1] < 4) && <span>${'$'.repeat(priceRange[0])} - ${'$'.repeat(priceRange[1])}</span>}
+            {maxPrice < 4 && <span>Up to {'$'.repeat(maxPrice)}</span>}
             {maxDistance < 15 && <span>Within {maxDistance} miles</span>}
             <Button variant="ghost" size="sm" onClick={clearFilters} className="h-auto p-1">
               <X className="h-3 w-3" />
