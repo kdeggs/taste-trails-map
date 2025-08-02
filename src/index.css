@@ -22,10 +22,10 @@ All colors MUST be HSL.
     --primary-light: 32 100% 75%;
     --primary-glow: 32 100% 85%;
     
-    /* Secondary: Warm golden yellow */
-    --secondary: 45 95% 75%;
-    --secondary-foreground: 45 30% 25%;
-    --secondary-light: 45 100% 85%;
+    /* Secondary: Warm peach/coral */
+    --secondary: 15 85% 70%;
+    --secondary-foreground: 15 30% 25%;
+    --secondary-light: 15 90% 80%;
     
     /* Accent: Fresh herb green */
     --accent: 120 50% 55%;
@@ -100,9 +100,9 @@ All colors MUST be HSL.
     --primary-light: 32 95% 70%;
     --primary-glow: 32 100% 80%;
     
-    --secondary: 45 90% 70%;
-    --secondary-foreground: 45 20% 90%;
-    --secondary-light: 45 95% 80%;
+    --secondary: 15 80% 65%;
+    --secondary-foreground: 15 20% 90%;
+    --secondary-light: 15 85% 75%;
     
     --accent: 120 45% 50%;
     --accent-foreground: 120 20% 90%;

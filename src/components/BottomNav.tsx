@@ -24,16 +24,16 @@ export const BottomNav = () => {
               to={path}
               className={cn(
                 "relative flex flex-col items-center justify-center min-w-0 flex-1 py-2 px-1 transition-all duration-300 rounded-xl",
-                "btn-press hover:bg-accent/30 hover:shadow-glow",
+                "btn-press hover:bg-primary/5 hover:scale-105",
                 isActive 
-                  ? "text-primary scale-110 bg-primary/10 shadow-primary-glow" 
-                  : "text-muted-foreground hover:text-foreground hover:scale-105"
+                  ? "text-primary scale-110 bg-primary/8" 
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Icon 
                 className={cn(
                   "h-5 w-5 mb-1 transition-all duration-300",
-                  isActive && "drop-shadow-md animate-pulse-soft"
+                  isActive && "drop-shadow-sm"
                 )} 
               />
               <span 
@@ -45,7 +45,7 @@ export const BottomNav = () => {
                 {label}
               </span>
               {isActive && (
-                <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-primary rounded-full animate-pulse-soft" />
+                <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-primary rounded-full" />
               )}
             </Link>
           );
