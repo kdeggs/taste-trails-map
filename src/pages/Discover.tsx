@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { PageTransition } from "@/components/PageTransition";
-import { RestaurantSearch } from "@/components/RestaurantSearch";
+import { EnhancedRestaurantSearch } from "@/components/EnhancedRestaurantSearch";
 import { CheckInDialog } from "@/components/CheckInDialog";
 import { AddToListDialog } from "@/components/AddToListDialog";
 import { toast } from "@/hooks/use-toast";
@@ -64,7 +64,7 @@ export default function Discover() {
 
       {/* Search Component */}
       <div className="p-4">
-        <RestaurantSearch
+        <EnhancedRestaurantSearch
           onSelectRestaurant={handleSelectRestaurant}
           onAddToList={handleAddToList}
         />
